@@ -1,0 +1,15 @@
+Fetchers:
+  - name: "router"
+    type: "TplinkArcherC80"
+    params:
+      ip: "192.168.0.1"
+      password: "password"
+      data_table_name: "router"
+Databases: 
+  - name: "VictoriaMetricsClient"
+    type: "VictoriaMetricsClient"
+    params:
+      db_url: "http://192.168.0.99:8428"
+
+FetchingInterval: 300 # seconds, interval between fetching data
+LogLevel: "DEBUG" # Log level for the logger

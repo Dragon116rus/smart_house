@@ -1,0 +1,5 @@
+services:
+  router_analyzer:
+    build:
+      context: .
+      dockerfile: Dockerfile
