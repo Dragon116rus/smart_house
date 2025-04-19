@@ -73,7 +73,7 @@ class Mwb210S(AbstractFetcher):
             noise_value = noise_value_elem.inner_text() if noise_value_elem else "0"
 
             cpu_value_elem = self.page.query_selector("#localDeviceCpuValueApRight")
-            cpu_value = noise_value_elem.inner_text() if cpu_value_elem else "0"
+            cpu_value = cpu_value_elem.inner_text() if cpu_value_elem else "0"
 
             return {
                 "Availability": int(page_availability),
