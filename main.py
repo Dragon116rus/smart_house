@@ -3,6 +3,8 @@ import time
 import os
 import yaml
 
+from playwright.sync_api import sync_playwright
+
 from data_fetchers import DATA_FETCHERS
 from data_fetchers.abstract_fetcher import AbstractFetcher
 from metrics import DATABASES
@@ -27,11 +29,12 @@ def main():
 
     # Initialize the fetchers and database clients from the config
     fetchers: list[AbstractFetcher] = []
+    playwright_ = sync_playwright().start()
     for fetcher_config in config.get("Fetchers", []):
         fetcher_type = fetcher_config["type"]
         fetcher_params = fetcher_config.get("params", {})
         if fetcher_type in DATA_FETCHERS:
-            fetchers.append(DATA_FETCHERS[fetcher_type](**fetcher_params))
+            fetchers.append(DATA_FETCHERS[fetcher_type](playwright_=playwright_, **fetcher_params))
         else:
             logger.warning(f"[!] Unknown fetcher type: {fetcher_type}")
 

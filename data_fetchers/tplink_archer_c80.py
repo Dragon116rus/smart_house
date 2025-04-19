@@ -6,14 +6,14 @@ from data_fetchers.abstract_fetcher import AbstractFetcher
 
 
 class TplinkArcherC80(AbstractFetcher):
-    def __init__(self, ip="192.168.0.1", password="admin", data_table_name="test"):
+    def __init__(self, playwright_, ip="192.168.0.1", password="admin", data_table_name="test"):
         self._logger = logging.getLogger(__name__)
         self.data_table_name = data_table_name
         self._logger = logging.getLogger(__name__)
         self.base_url = f"http://{ip}/"
         self.password = password
 
-        self.playwright = sync_playwright().start()
+        self.playwright = playwright_
         self.browser = self.playwright.chromium.launch(headless=True)
         self.page = self.browser.new_page()
 
@@ -85,7 +85,8 @@ class TplinkArcherC80(AbstractFetcher):
 if __name__ == "__main__":
     password = os.getenv("ROUTER_PASSWORD", "admin")
     url = os.getenv("ROUTER_URL", "http://192.168.0.1")
-    parser = TplinkArcherC80(password=password, ip=url)  # change password if needed
+    playwright_ = sync_playwright().start()
+    parser = TplinkArcherC80(playwright_=playwright_, password=password, ip=url)  # change password if needed
     data = parser.fetch_data()
 
     if data:

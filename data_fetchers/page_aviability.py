@@ -5,7 +5,7 @@ from data_fetchers.abstract_fetcher import AbstractFetcher
 
 
 class PageAviabilityChecker(AbstractFetcher):
-    def __init__(self, url, data_table_name="test"):
+    def __init__(self, url, data_table_name="test", **kwargs):
         self.url = url
         self.data_table_name = data_table_name
         self._logger = logging.getLogger(__name__)

@@ -5,39 +5,33 @@ import time
 from data_fetchers.abstract_fetcher import AbstractFetcher
 
 
-class ZteMF79U(AbstractFetcher):
+class Mwb210S(AbstractFetcher):
     def __init__(
-        self, playwright_, ip="192.168.0.1", password="admin", data_table_name="test"
+        self, playwright_, ip="192.168.1.252", password="admin", data_table_name="test"
     ):
         self.data_table_name = data_table_name
         self._logger = logging.getLogger(__name__)
         self.base_url = f"http://{ip}/"
         self.password = password
         self.playwright = playwright_
-        self.browser = self.playwright.chromium.launch(headless=True)
+        self.browser = self.playwright.chromium.launch(headless=False)
         self.page = self.browser.new_page()
 
     def login(self):
         try:
-            self.page.goto(f"{self.base_url}index.html")
+            self.page.goto(self.base_url)
             time.sleep(2)
         except Exception:
             self._logger.debug("[-] Router web not available")
             return False
 
         try:
-            # Click login button to open modal, if needed
-            login_btn = self.page.query_selector("#btnLogin")
-            if login_btn:
-                login_btn.click()
-                time.sleep(1)
-
             # Input password and submit
-            pwd_input = self.page.query_selector("#txtPwd")
+            pwd_input = self.page.query_selector("#adminPwd")
             if pwd_input:
                 pwd_input.fill(self.password)
 
-            submit_btn = self.page.query_selector("#btnLogin")
+            submit_btn = self.page.query_selector("#loginBtn")
             if submit_btn:
                 submit_btn.click()
 
@@ -53,8 +47,9 @@ class ZteMF79U(AbstractFetcher):
         return True
 
     @staticmethod
-    def parse_antenna_value(data: str):
+    def parse_value(data: str):
         value = data.split()[0]
+        value = value.replace("%", "")
         return float(value)
 
     def fetch_data(self):
@@ -64,27 +59,29 @@ class ZteMF79U(AbstractFetcher):
             if not page_availability:
                 return {"Availability": int(page_availability)}
 
-            self.page.goto(f"{self.base_url}/index.html#antenna")
-            time.sleep(2)
 
-            rssi_elem = self.page.query_selector("#m_rssi")
-            network_type = rssi_elem.inner_text() if rssi_elem else "0"
+            ccq_elem = self.page.query_selector("#localDeviceCcqValue")
+            ccq = ccq_elem.inner_text() if ccq_elem else "0"
 
-            sinr_elem = self.page.query_selector("#m_sinr")
-            sinr = sinr_elem.inner_text() if sinr_elem else "0"
+            snr_elem = self.page.query_selector("#localDeviceSnrValue")
+            snr = snr_elem.inner_text() if snr_elem else "0"
 
-            rsrp_elem = self.page.query_selector("#m_rsrp")
-            rsrp = rsrp_elem.inner_text() if rsrp_elem else "0"
+            signal_value_elem = self.page.query_selector("#localDeviceSignalValue")
+            signal_value = signal_value_elem.inner_text() if signal_value_elem else "0"
 
-            rsrq_elem = self.page.query_selector("#m_rsrq")
-            rsrq = rsrq_elem.inner_text() if rsrq_elem else "0"
+            noise_value_elem = self.page.query_selector("#localDeviceNoiseValue")
+            noise_value = noise_value_elem.inner_text() if noise_value_elem else "0"
+
+            cpu_value_elem = self.page.query_selector("#localDeviceCpuValueApRight")
+            cpu_value = noise_value_elem.inner_text() if cpu_value_elem else "0"
 
             return {
                 "Availability": int(page_availability),
-                "RSSI": self.parse_antenna_value(network_type),
-                "SINR": self.parse_antenna_value(sinr),
-                "RSRP": self.parse_antenna_value(rsrp),
-                "RSRQ": self.parse_antenna_value(rsrq),
+                "CCQ": self.parse_value(ccq),
+                "SNR": self.parse_value(snr),
+                "Signal value": self.parse_value(signal_value),
+                "Noise value": self.parse_value(noise_value),
+                "CPU loading": self.parse_value(cpu_value),
             }
 
         except Exception as e:
@@ -98,7 +95,7 @@ class ZteMF79U(AbstractFetcher):
 
 if __name__ == "__main__":
     playwright_ = sync_playwright().start()
-    parser = ZteMF79U(playwright_, password="admin")  # change password if needed
+    parser = Mwb210S(playwright_=playwright_, password="admin")  # change password if needed
     data = parser.fetch_data()
     parser.close()
 
