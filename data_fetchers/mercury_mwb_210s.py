@@ -14,7 +14,7 @@ class Mwb210S(AbstractFetcher):
         self.base_url = f"http://{ip}/"
         self.password = password
         self.playwright = playwright_
-        self.browser = self.playwright.chromium.launch(headless=False)
+        self.browser = self.playwright.chromium.launch(headless=True)
         self.page = self.browser.new_page()
 
     def login(self):
